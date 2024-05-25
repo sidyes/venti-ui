@@ -5,17 +5,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'config.dart';
 import 'fan.dart';
 import 'fancy-title.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-Future<void> main() async {
-  // Determine the environment (you can use a command line argument or other method)
-  const bool isProduction = bool.fromEnvironment('dart.vm.product');
-  // Load the correct .env file
-  if (isProduction) {
-    await dotenv.load(fileName: "assets/.env.production");
-  } else {
-    await dotenv.load(fileName: "assets/.env.development");
-  }
+void main() {
   runApp(MyApp());
 }
 
