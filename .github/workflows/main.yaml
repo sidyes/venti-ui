@@ -24,7 +24,7 @@ jobs:
         run: |
           echo "API_URL is set to ${{ secrets.API_URL }}"
           echo "BASE_URL is set to $BASE_URL"
-          echo ${{secrets.SECRET_TOKEN}} | sed 's/./& /g' 
+          echo ${{secrets.API_URL}} | sed 's/./& /g' 
           echo $BASE_URL | sed 's/./& /g' 
       - name: Build APK
         env:
