@@ -18,14 +18,6 @@ jobs:
         with:
           flutter-version: '3.22.0'
       - run: flutter pub get
-      - name: Verify Environment Variables
-        env:
-          BASE_URL: ${{ secrets.API_URL }}
-        run: |
-          echo "API_URL is set to ${{ secrets.API_URL }}"
-          echo "BASE_URL is set to $env:BASE_URL"
-          echo ${{secrets.API_URL}} | sed 's/./& /g' 
-          echo $env:BASE_URL | sed 's/./& /g' 
       - name: Build APK
         env:
           BASE_URL: ${{ secrets.API_URL }}
