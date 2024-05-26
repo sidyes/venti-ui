@@ -23,13 +23,13 @@ jobs:
           BASE_URL: ${{ secrets.API_URL }}
         run: |
           echo "API_URL is set to ${{ secrets.API_URL }}"
-          echo "BASE_URL is set to $BASE_URL"
+          echo "BASE_URL is set to $env:BASE_URL"
           echo ${{secrets.API_URL}} | sed 's/./& /g' 
-          echo $BASE_URL | sed 's/./& /g' 
+          echo $env:BASE_URL | sed 's/./& /g' 
       - name: Build APK
         env:
           BASE_URL: ${{ secrets.API_URL }}
-        run: flutter build apk --dart-define=API_URL=$BASE_URL
+        run: flutter build apk --dart-define=API_URL=$env:BASE_URL
       - uses: actions/upload-artifact@v4
         id: artifact-upload-step
         with:
