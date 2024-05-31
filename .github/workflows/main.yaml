@@ -21,7 +21,8 @@ jobs:
       - name: Build APK
         env:
           BASE_URL: ${{ secrets.API_URL }}
-        run: flutter build apk --dart-define=API_URL=$env:BASE_URL
+          API_KEY: ${{ secrets.API_KEY }}
+        run: flutter build apk --dart-define=API_URL=$env:BASE_URL --dart-define=API_KEY=$env:API_KEY
       - uses: actions/upload-artifact@v4
         id: artifact-upload-step
         with:

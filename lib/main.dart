@@ -61,8 +61,12 @@ class _MyDevicesPageState extends State<MyDevicesPage> {
 
   Future<List<Device>> fetchDevices() async {
     try {
-      final response =
-          await http.get(Uri.parse(Config.baseUrl + Config.fansRoute));
+      final response = await http.get(
+        Uri.parse(Config.baseUrl + Config.fansRoute),
+        headers: {
+          'X-API-KEY': Config.apiKey,
+        },
+      );
 
       if (response.statusCode == 200) {
         List jsonResponse = json.decode(response.body);
