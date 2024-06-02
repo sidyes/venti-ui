@@ -2,16 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:venti_ui/config.dart';
+
 class Fan extends StatelessWidget {
   final String id;
   final String location;
 
-  const Fan({Key? key, required this.id, required this.location}) : super(key: key);
+  const Fan({Key? key, required this.id, required this.location})
+      : super(key: key);
 
   Future<void> sendCommand(String command) async {
-    final url = 'http://localhost:3000/fans/$id?cmd=$command';
+    final url = '${Config.baseUrl}${Config.fansRoute}/$id?cmd=$command';
+
     try {
-      final response = await http.post(Uri.parse(url));
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'X-API-KEY': Config.apiKey,
+        },
+      );
       if (response.statusCode == 200) {
         // Success
       } else {
