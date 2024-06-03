@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
 }
 
 class Device {
-  final String id;
+  final int id;
   final String location;
 
   Device({required this.id, required this.location});
@@ -120,37 +120,7 @@ class _MyDevicesPageState extends State<MyDevicesPage> {
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              //return Text('No Devices could be found.');
-
-              List dummyData = [Device(id: "0", location: "Living Room")];
-              return Center(
-                  child: ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                shrinkWrap: true,
-                itemCount: dummyData!.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 8.0),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Fan(
-                                id: dummyData![index].id,
-                                location: dummyData![index].location,
-                              ),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: Size(double.infinity, 50),
-                        ),
-                        child: Text(dummyData![index].location),
-                      ));
-                },
-              ));
+              return Text('No Devices could be found.');
             } else {
               return Center(
                   child: ListView.builder(
@@ -167,7 +137,7 @@ class _MyDevicesPageState extends State<MyDevicesPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => Fan(
-                                id: snapshot.data![index].id,
+                                id: snapshot.data![index].id.toString(),
                                 location: snapshot.data![index].location,
                               ),
                             ),
