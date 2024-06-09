@@ -7,7 +7,7 @@ import 'fan.dart';
 import 'fancy-title.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -95,65 +95,88 @@ class _MyDevicesPageState extends State<MyDevicesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFF00BCD4), // Light blue
-                Color(0xFF00838F), // Darker blue
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF00BCD4), // Light blue
+                  Color(0xFF00838F), // Darker blue
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
           ),
+          title: const FancyTitle(),
         ),
-        title: const FancyTitle(),
-      ),
-      body: Center(
-        child: FutureBuilder<List<Device>>(
-          future: _devicesFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
-            } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Text('No Devices could be found.');
-            } else {
-              return Center(
-                  child: ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                shrinkWrap: true,
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 8.0),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Fan(
-                                id: snapshot.data![index].id.toString(),
-                                location: snapshot.data![index].location,
+        body: Container(
+          
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: Text(
+                  'My Locations',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  // List of locations
+                  child: FutureBuilder<List<Device>>(
+                    future: _devicesFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Text('No Devices could be found.');
+                      } else {
+                        return ListView.builder(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 8.0,
                               ),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: Size(double.infinity, 50),
-                        ),
-                        child: Text(snapshot.data![index].location),
-                      ));
-                },
-              ));
-            }
-          },
-        ),
-      ),
-    );
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => Fan(
+                                        id: snapshot.data![index].id.toString(),
+                                        location:
+                                            snapshot.data![index].location,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: const Size(double.infinity, 50),
+                                ),
+                                child: Text(snapshot.data![index].location),
+                              ),
+                            );
+                          },
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ));
   }
 }

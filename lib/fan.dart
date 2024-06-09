@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
@@ -5,45 +7,94 @@ import 'dart:convert';
 
 import 'package:venti_ui/config.dart';
 
-class Fan extends StatelessWidget {
+class Fan extends StatefulWidget {
   final String id;
   final String location;
 
   const Fan({Key? key, required this.id, required this.location})
       : super(key: key);
 
+  @override
+  _FanState createState() => _FanState();
+}
+
+class _FanState extends State<Fan> {
+  bool isNightModeActive = false;
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Start a timer to check the status every 10 seconds
+    checkStatus();
+    _timer = Timer.periodic(const Duration(seconds: 10), (_) => checkStatus());
+  }
+
+  @override
+  void dispose() {
+    // Dispose the timer
+    _timer.cancel();
+    super.dispose();
+  }
+
+  Future<void> checkStatus() async {
+    try {
+      final statusUrl =
+          '${Config.baseUrl}${Config.fansRoute}/${widget.id}/status';
+      final response = await http.get(
+        Uri.parse(statusUrl),
+        headers: {'X-API-KEY': Config.apiKey},
+      );
+      if (response.statusCode == 200) {
+        final isRunning = json.decode(response.body)['isRunning'];
+        setState(() {
+          isNightModeActive = isRunning;
+        });
+      } else {
+        setState(() {
+          isNightModeActive = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isNightModeActive = false;
+      });
+    }
+  }
+
   Future<void> sendCommand(String command) async {
-    final url = '${Config.baseUrl}${Config.fansRoute}/$id?cmd=$command';
+    final url =
+        '${Config.baseUrl}${Config.fansRoute}/${widget.id}?cmd=$command';
 
     try {
       final response = await http.get(
         Uri.parse(url),
-        headers: {
-          'X-API-KEY': Config.apiKey,
-        },
+        headers: {'X-API-KEY': Config.apiKey},
       );
       if (response.statusCode == 200) {
         // Success
+        checkStatus(); // Check status after command sent
       } else {
         Fluttertoast.showToast(
-            msg: "Failed to send command: $command",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0);
-      }
-    } catch (e) {
-      // Handle network error
-      Fluttertoast.showToast(
-          msg: "Network error",
+          msg: "Failed to send command: $command",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
           backgroundColor: Colors.red,
           textColor: Colors.white,
-          fontSize: 16.0);
+          fontSize: 16.0,
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Network error",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
     }
   }
 
@@ -51,12 +102,11 @@ class Fan extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(location),
+        title: Text(widget.location),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
-          // To handle overflow if content is too large
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -86,23 +136,23 @@ class Fan extends StatelessWidget {
                 children: [
                   ElevatedButton(
                     onPressed: () => sendCommand('SPEED_1'),
-                    child: const Text('slowest'),
+                    child: const Text('1'),
                   ),
                   ElevatedButton(
                     onPressed: () => sendCommand('SPEED_2'),
-                    child: const Text('slower'),
+                    child: const Text('2'),
                   ),
                   ElevatedButton(
                     onPressed: () => sendCommand('SPEED_3'),
-                    child: const Text('normal'),
+                    child: const Text('3'),
                   ),
                   ElevatedButton(
                     onPressed: () => sendCommand('SPEED_4'),
-                    child: const Text('fast'),
+                    child: const Text('4'),
                   ),
                   ElevatedButton(
                     onPressed: () => sendCommand('SPEED_5'),
-                    child: const Text('fastest'),
+                    child: const Text('5'),
                   ),
                 ],
               ),
@@ -153,15 +203,69 @@ class Fan extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    const Text(
-                      'Running with slow speed for five minutes every hour for 7 hours',
-                      style: TextStyle(color: Colors.white),
+                    Text(
+                      isNightModeActive
+                          ? 'Night Mode active'
+                          : 'Night Mode inactive',
+                      style: TextStyle(
+                        color: isNightModeActive ?  Colors.lightBlue : Colors.white,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Mode 1:',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          'Running with slow speed for 10 minutes every hour for 7 hours',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 10),
                     Center(
                       child: ElevatedButton(
-                        onPressed: () => sendCommand('NIGHT_MODE'),
-                        child: const Text('Mode 1'),
+                        onPressed: () => sendCommand('NIGHT_MODE_1'),
+                        child: const Text('Start Night Mode 1'),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Mode 2:',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          'Running with slow speed for 30 minutes, then stops. Starts running again at 5:30 a.m.',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () => sendCommand('NIGHT_MODE_2'),
+                        child: const Text('Start Night Mode 2'),
                       ),
                     ),
                   ],
