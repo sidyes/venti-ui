@@ -2,12 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:multicast_dns/multicast_dns.dart';
 import 'config.dart';
 import 'fan.dart';
 import 'fancy-title.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (!kIsWeb) {
+    // Resolve the IP address
+    await resolveIpAddress('_http._tcp', Config.baseUrl);
+  }
+
   runApp(const MyApp());
+}
+
+resolveIpAddress(String service, String host) async {
+  final MDnsClient client = MDnsClient();
+  await client.start();
+
+  await for (final SrvResourceRecord srv
+      in client.lookup<SrvResourceRecord>(ResourceRecordQuery.service(host))) {
+    print('SRV target: ${srv.target} port: ${srv.port}');
+
+    await for (final IPAddressResourceRecord ip
+        in client.lookup<IPAddressResourceRecord>(
+            ResourceRecordQuery.addressIPv4(srv.target))) {
+      print('IP: ${ip.address.toString()}');
+      Config.setBaseUrl('http:${ip.address.toString()}');
+    }
+  }
+  client.stop();
 }
 
 class MyApp extends StatelessWidget {
@@ -112,7 +139,6 @@ class _MyDevicesPageState extends State<MyDevicesPage> {
           title: const FancyTitle(),
         ),
         body: Container(
-          
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [

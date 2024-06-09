@@ -38,6 +38,7 @@ dependencies:
   http: ^1.2.1
   fluttertoast: ^8.2.5
   flutter_dotenv: ^5.1.0
+  multicast_dns: ^0.3.2+6
 
 dev_dependencies:
   flutter_test:
